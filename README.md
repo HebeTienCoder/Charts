@@ -1,1 +1,1 @@
-Add CornerRadius to BarChart
+Add CornerRadius & GradientColors to BarChartView

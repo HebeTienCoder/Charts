@@ -234,13 +234,6 @@ open class HorizontalBarChartRenderer: BarChartRenderer
         
         let buffer = _buffers[index]
         
-        let isSingleColor = dataSet.colors.count == 1
-        
-        if isSingleColor
-        {
-            context.setFillColor(dataSet.color(atIndex: 0).cgColor)
-        }
-        
         context.setStrokeColor(borderColor.cgColor)
         context.setLineWidth(borderWidth)
         context.setLineCap(.square)
@@ -278,14 +271,7 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                     break
                 }
                 
-                if !isSingleColor
-                {
-                    // Set the color for the currently drawn value. If the index is out of bounds, reuse colors.
-                    context.setFillColor(dataSet.color(atIndex: index).cgColor)
-                }
-                
-                context.addRect(barRect)
-                context.fillPath()
+                drawBar(context: context, dataSet: dataSet, index: firstIndexInBar, barRect: barRect)
                 
                 if drawBorder {
                     context.stroke(barRect)

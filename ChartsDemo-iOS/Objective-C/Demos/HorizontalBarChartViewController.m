@@ -136,6 +136,12 @@
         set1 = [[BarChartDataSet alloc] initWithValues:yVals label:@"DataSet"];
         
         set1.drawIconsEnabled = NO;
+        //cornerRadius
+        set1.roundedCorners = UIRectCornerTopRight|UIRectCornerBottomRight;
+        set1.cornerRadius = 3.0;
+        //gradient
+        set1.barGradientColors = ChartColorTemplates.gradients;
+        set1.barGradientOrientation = BarGradientOrientationHorizontal;
         
         NSMutableArray *dataSets = [[NSMutableArray alloc] init];
         [dataSets addObject:set1];

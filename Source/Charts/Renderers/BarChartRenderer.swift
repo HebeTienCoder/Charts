@@ -300,13 +300,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             }
         }
         
-        let isSingleColor = dataSet.colors.count == 1
-        
-        if isSingleColor
-        {
-            context.setFillColor(dataSet.color(atIndex: 0).cgColor)
-        }
-        
         context.setStrokeColor(borderColor.cgColor)
         context.setLineWidth(borderWidth)
         context.setLineCap(.square)
@@ -343,17 +336,10 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                     break
                 }
                 
-                if !isSingleColor
-                {
-                    // Set the color for the currently drawn value. If the index is out of bounds, reuse colors.
-                    context.setFillColor(dataSet.color(atIndex: index).cgColor)
-                }
-                
-                context.addRect(barRect)
-                context.fillPath()
+                drawBar(context: context, dataSet: dataSet, index: firstIndexInBar, barRect: barRect)
                 
                 if drawBorder {
-                    context.stroke(barRect)
+                    context.saveGState()
                 }
                 
                 // Create and append the corresponding accessibility element to accessibilityOrderedElements
@@ -381,6 +367,50 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 context.strokePath()
             }
         }
+    }
+    
+    open func drawBar(context: CGContext, dataSet: BarChartDataSetProtocol, index: Int, barRect: CGRect)
+    {
+        context.saveGState()
+        defer { context.restoreGState() }
+        
+        if let gradientColor = dataSet.barGradientColor(at: index)
+        {
+            drawGradient(context: context, barRect: barRect, gradientColors: gradientColor, orientation: dataSet.barGradientOrientation)
+        }
+        else
+        {
+            // Set the color for the currently drawn value. If the index is out of bounds, reuse colors.
+            let fillColor = dataSet.color(atIndex: index).cgColor
+            context.setFillColor(fillColor)
+            context.fill(barRect)
+        }
+    }
+    
+    open func drawGradient(context: CGContext, barRect: CGRect, gradientColors: Array<NSUIColor>, orientation: BarGradientOrientation)
+    {
+        let cgColors = gradientColors.map{ $0.cgColor } as CFArray
+        let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: cgColors, locations: nil)
+        
+        let startPoint: CGPoint
+        let endPoint: CGPoint
+        
+        switch orientation
+        {
+        case .vertical:
+            startPoint = CGPoint(x: barRect.midX, y: barRect.maxY)
+            endPoint = CGPoint(x: barRect.midX, y: barRect.minY)
+            
+        case .horizontal:
+            startPoint = CGPoint(x: barRect.minX, y: barRect.midY)
+            endPoint = CGPoint(x: barRect.maxX, y: barRect.midY)
+        }
+        
+        let path = CGPath(rect: barRect, transform: nil)
+        
+        context.addPath(path)
+        context.clip()
+        context.drawLinearGradient(gradient!, start: startPoint, end: endPoint, options: [])
     }
     
     open func prepareBarHighlight(

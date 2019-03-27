@@ -52,6 +52,8 @@
     _chartView.drawBarShadowEnabled = NO;
     _chartView.drawValueAboveBarEnabled = YES;
     
+    [_chartView setVisibleXRangeWithMinXRange:7 maxXRange:7];
+    
     _chartView.maxVisibleCount = 60;
     
     ChartXAxis *xAxis = _chartView.xAxis;
@@ -133,7 +135,7 @@
     
     NSMutableArray *yVals = [[NSMutableArray alloc] init];
     
-    for (int i = start; i < start + count + 1; i++)
+    for (int i = start; i < 2; i++)
     {
         double mult = (range + 1);
         double val = (double) (arc4random_uniform(mult));
@@ -170,7 +172,8 @@
         BarChartData *data = [[BarChartData alloc] initWithDataSets:dataSets];
         [data setValueFont:[UIFont fontWithName:@"HelveticaNeue-Light" size:10.f]];
         
-        data.barWidth = 0.9f;
+        data.barWidth = 0.5;
+
         
         _chartView.data = data;
     }

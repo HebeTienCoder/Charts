@@ -53,7 +53,7 @@
     _chartView.drawGridBackgroundEnabled = NO;
     _chartView.drawBarShadowEnabled = NO;
     _chartView.drawValueAboveBarEnabled = NO;
-    _chartView.highlightFullBarEnabled = NO;
+    _chartView.highlightFullBarEnabled = YES;
     
     NSNumberFormatter *leftAxisFormatter = [[NSNumberFormatter alloc] init];
     leftAxisFormatter.maximumFractionDigits = 1;
@@ -79,9 +79,10 @@
     l.formToTextSpace = 4.0;
     l.xEntrySpace = 6.0;
     
-    _sliderX.value = 12.0;
+    _sliderX.value = 6;
     _sliderY.value = 100.0;
     [self slidersValueChanged:nil];
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -110,9 +111,8 @@
         double mult = (range + 1);
         double val1 = (double) (arc4random_uniform(mult) + mult / 3);
         double val2 = (double) (arc4random_uniform(mult) + mult / 3);
-        double val3 = (double) (arc4random_uniform(mult) + mult / 3);
         
-        [yVals addObject:[[BarChartDataEntry alloc] initWithX:i yValues:@[@(val1), @(val2), @(val3)] icon: [UIImage imageNamed:@"icon"]]];
+        [yVals addObject:[[BarChartDataEntry alloc] initWithX:i yValues:@[@(val1), @(val2)] icon: [UIImage imageNamed:@"icon"]]];
     }
     
     BarChartDataSet *set1 = nil;
@@ -129,8 +129,32 @@
         
         set1.drawIconsEnabled = NO;
         
-        set1.colors = @[ChartColorTemplates.material[0], ChartColorTemplates.material[1], ChartColorTemplates.material[2]];
-        set1.stackLabels = @[@"Births", @"Divorces", @"Marriages"];
+        set1.stackLabels = @[@"Births", @"Divorces"];
+        
+        set1.roundedCorners = UIRectCornerTopLeft|UIRectCornerTopRight;
+        set1.cornerRadius = 5.0;
+        
+        CGFloat alpha = 0.5;
+        set1.barGradientColors = @[
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]]
+  ];
+//        set1.barGradientOrientation = BarGradientOrientationHorizontal;
+        
+        set1.highlightAlpha = 0;
+//        set1.highlightColor = UIColor.clearColor;
         
         NSMutableArray *dataSets = [[NSMutableArray alloc] init];
         [dataSets addObject:set1];
@@ -148,6 +172,8 @@
         _chartView.fitBars = YES;
         _chartView.data = data;
     }
+    
+    [_chartView highlightValueWithX:2 dataSetIndex:0 stackIndex:-1];
 }
 
 - (void)optionTapped:(NSString *)key
@@ -169,7 +195,27 @@
 
 - (void)chartValueSelected:(ChartViewBase * __nonnull)chartView entry:(ChartDataEntry * __nonnull)entry highlight:(ChartHighlight * __nonnull)highlight
 {
-    NSLog(@"chartValueSelected, stack-index %ld", (long)highlight.stackIndex);
+    NSLog(@"chartValueSelected, stack-index %ld", (long)highlight.x);
+    
+    CGFloat alpha = 0.5;
+    NSMutableArray *arr = @[
+                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]]
+                            ].mutableCopy;
+    [arr insertObjects:@[@[[UIColor.yellowColor colorWithAlphaComponent:1], [UIColor.orangeColor colorWithAlphaComponent:1]],
+                        @[[UIColor.redColor colorWithAlphaComponent:1], [UIColor.purpleColor colorWithAlphaComponent:1]]] atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange((long)highlight.x*2, 2)]];
+    ((BarChartDataSet *)chartView.data.dataSets[0]).barGradientColors = arr;
+    [chartView notifyDataSetChanged];
 }
 
 - (void)chartValueNothingSelected:(ChartViewBase * __nonnull)chartView

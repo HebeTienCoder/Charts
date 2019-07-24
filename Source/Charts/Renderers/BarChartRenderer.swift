@@ -307,36 +307,121 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         // In case the chart is stacked, we need to accomodate individual bars within accessibilityOrdereredElements
         let isStacked = dataSet.isStacked
         let stackSize = isStacked ? dataSet.stackSize : 1
-
-        for firstIndexInBar in buffer.indices
-        {
-            context.saveGState()
-            let lastIndexInBar = firstIndexInBar + stackSize - 1
+        
+        if stackSize > 1 {
             
-            let topRectInBar = findTopRectInBar(barRects: buffer,
-                                                firstIndexInBar: firstIndexInBar,
-                                                lastIndexInBar: lastIndexInBar)
+            var topRoundedCorners = UIRectCorner.allCorners, bottomRoundedCorners = UIRectCorner.allCorners
+            if dataSet.roundedCorners.contains(.topLeft) && dataSet.roundedCorners.contains(.topRight)
+            {
+                topRoundedCorners = [.topLeft, .topRight]
+            }
+            else if dataSet.roundedCorners.contains(.topLeft)
+            {
+                topRoundedCorners = .topLeft
+            }
+            else if dataSet.roundedCorners.contains(.topRight)
+            {
+                topRoundedCorners = .topRight
+            }
+            if dataSet.roundedCorners.contains(.bottomLeft) && dataSet.roundedCorners.contains(.bottomRight)
+            {
+                bottomRoundedCorners = [.bottomLeft, .bottomRight]
+            }
+            else if dataSet.roundedCorners.contains(.bottomLeft)
+            {
+                bottomRoundedCorners = .bottomLeft
+            }
+            else if dataSet.roundedCorners.contains(.bottomRight)
+            {
+                bottomRoundedCorners = .bottomRight
+            }
             
-            let path = createBarPath(for: topRectInBar, roundedCorners: dataSet.roundedCorners, cornerRadius: dataSet.cornerRadius)
-            
-            context.addPath(path.cgPath)
-            context.clip()
-
-            for index in firstIndexInBar...lastIndexInBar {
+            for firstIndexInBar in stride(from: 0, to: buffer.count, by: stackSize)
+            {
+                let lastIndexInBar = firstIndexInBar + stackSize - 1
                 
-                let barRect = buffer[index]
-                
-                if (!viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width))
+                var topIndexInBar = -1, bottomIndexInBar = -1
+                if dataSet.roundedCorners.contains(.topLeft) || dataSet.roundedCorners.contains(.topRight)
                 {
-                    continue
+                    topIndexInBar = findTopIndexInBar(barRects: buffer,
+                                                      firstIndexInBar: firstIndexInBar,
+                                                      lastIndexInBar: lastIndexInBar)
+                }
+                if dataSet.roundedCorners.contains(.bottomLeft) || dataSet.roundedCorners.contains(.bottomRight)
+                {
+                    bottomIndexInBar = findBottomIndexInBar(barRects: buffer,
+                                                            firstIndexInBar: firstIndexInBar,
+                                                            lastIndexInBar: lastIndexInBar)
                 }
                 
-                if (!viewPortHandler.isInBoundsRight(barRect.origin.x))
+                for stackIndex in firstIndexInBar...lastIndexInBar
                 {
-                    break
+                    context.saveGState()
+                    
+                    let barRect = buffer[stackIndex]
+                    var path : UIBezierPath
+                    if topIndexInBar>=0 && stackIndex==topIndexInBar
+                    {
+                        path = createBarPath(for: barRect, roundedCorners: topRoundedCorners, cornerRadius: dataSet.cornerRadius)
+                    }
+                    else if bottomIndexInBar>=0 && stackIndex==bottomIndexInBar
+                    {
+                        path = createBarPath(for: barRect, roundedCorners: bottomRoundedCorners, cornerRadius: dataSet.cornerRadius)
+                    }
+                    else
+                    {
+                        path = createBarPath(for: barRect, roundedCorners: .allCorners, cornerRadius: 0)
+                    }
+                    
+                    context.addPath(path.cgPath)
+                    context.clip()
+                    
+                    guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
+                    guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
+                    
+                    drawBar(context: context, dataSet: dataSet, index: stackIndex, barRect: barRect)
+                    
+                    // Create and append the corresponding accessibility element to accessibilityOrderedElements
+                    if let chart = dataProvider as? BarChartView
+                    {
+                        let element = createAccessibleElement(withIndex: stackIndex,
+                                                              container: chart,
+                                                              dataSet: dataSet,
+                                                              dataSetIndex: index,
+                                                              stackSize: stackSize)
+                        { (element) in
+                            element.accessibilityFrame = barRect
+                        }
+                        
+                        accessibilityOrderedElements[stackIndex/stackSize].append(element)
+                    }
+                    
+                    context.restoreGState()
+                    
+                    if drawBorder
+                    {
+                        context.addPath(path.cgPath)
+                        context.strokePath()
+                    }
                 }
+            }
+            
+        }else {
+            for barIndex in buffer.indices
+            {
+                context.saveGState()
                 
-                drawBar(context: context, dataSet: dataSet, index: firstIndexInBar, barRect: barRect)
+                let barRect = buffer[barIndex]
+                
+                let path = createBarPath(for: barRect, roundedCorners: dataSet.roundedCorners, cornerRadius: dataSet.cornerRadius)
+                
+                context.addPath(path.cgPath)
+                context.clip()
+                
+                guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
+                guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
+                
+                drawBar(context: context, dataSet: dataSet, index: barIndex, barRect: barRect)
                 
                 if drawBorder {
                     context.saveGState()
@@ -345,7 +430,7 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 // Create and append the corresponding accessibility element to accessibilityOrderedElements
                 if let chart = dataProvider as? BarChartView
                 {
-                    let element = createAccessibleElement(withIndex: index,
+                    let element = createAccessibleElement(withIndex: barIndex,
                                                           container: chart,
                                                           dataSet: dataSet,
                                                           dataSetIndex: index,
@@ -354,17 +439,16 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                         element.accessibilityFrame = barRect
                     }
                     
-                    accessibilityOrderedElements[index/stackSize].append(element)
+                    accessibilityOrderedElements[barIndex/stackSize].append(element)
                 }
                 
-            }
-            
-            context.restoreGState()
-            
-            if drawBorder
-            {
-                context.addPath(path.cgPath)
-                context.strokePath()
+                context.restoreGState()
+                
+                if drawBorder
+                {
+                    context.addPath(path.cgPath)
+                    context.strokePath()
+                }
             }
         }
     }
@@ -848,10 +932,12 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         return element
     }
     
-    private func findTopRectInBar(barRects: [CGRect], firstIndexInBar: Int, lastIndexInBar: Int) -> CGRect {
-        var topRectInBar = barRects[firstIndexInBar]
+    private func findTopIndexInBar(barRects: [CGRect], firstIndexInBar: Int, lastIndexInBar: Int) -> Int {
+        var topIndexInBar = firstIndexInBar;
+        var topRectInBar = barRects[topIndexInBar]
         if barRects[lastIndexInBar].origin.y < topRectInBar.origin.y {
-            topRectInBar = barRects[lastIndexInBar]
+            topIndexInBar = lastIndexInBar;
+            topRectInBar = barRects[topIndexInBar]
         }
         
         var height: CGFloat = 0
@@ -861,7 +947,25 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         
         topRectInBar.size.height = height
         
-        return topRectInBar
+        return topIndexInBar
+    }
+    
+    private func findBottomIndexInBar(barRects: [CGRect], firstIndexInBar: Int, lastIndexInBar: Int) -> Int {
+        var bottomIndexInBar = firstIndexInBar;
+        var bottomRectInBar = barRects[bottomIndexInBar]
+        if barRects[lastIndexInBar].origin.y > bottomRectInBar.origin.y {
+            bottomIndexInBar = lastIndexInBar;
+            bottomRectInBar = barRects[bottomIndexInBar]
+        }
+        
+        var height: CGFloat = 0
+        for index in firstIndexInBar...lastIndexInBar {
+            height += barRects[index].height
+        }
+        
+        bottomRectInBar.size.height = height
+        
+        return bottomIndexInBar
     }
     
     /// Creates path for bar in rect with rounded corners

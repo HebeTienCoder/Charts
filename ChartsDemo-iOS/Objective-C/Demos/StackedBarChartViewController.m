@@ -45,14 +45,11 @@
                     ];
     
     _chartView.delegate = self;
-    
-    _chartView.chartDescription.enabled = NO;
-    
-    _chartView.maxVisibleCount = 40;
-    _chartView.pinchZoomEnabled = NO;
-    _chartView.drawGridBackgroundEnabled = NO;
-    _chartView.drawBarShadowEnabled = NO;
-    _chartView.drawValueAboveBarEnabled = NO;
+    _chartView.legend.enabled = NO;
+    _chartView.leftAxis.enabled = NO;
+    _chartView.noDataText = @"暂无骑行数据";
+    _chartView.scaleYEnabled = NO;
+    _chartView.doubleTapToZoomEnabled = NO;
     _chartView.highlightFullBarEnabled = YES;
     
     NSNumberFormatter *leftAxisFormatter = [[NSNumberFormatter alloc] init];
@@ -60,14 +57,35 @@
     leftAxisFormatter.negativeSuffix = @" $";
     leftAxisFormatter.positiveSuffix = @" $";
 
-    ChartYAxis *leftAxis = _chartView.leftAxis;
-    leftAxis.valueFormatter = [[ChartDefaultAxisValueFormatter alloc] initWithFormatter:leftAxisFormatter];
-    leftAxis.axisMinimum = 0.0; // this replaces startAtZero = YES
-    
-    _chartView.rightAxis.enabled = NO;
-    
     ChartXAxis *xAxis = _chartView.xAxis;
-    xAxis.labelPosition = XAxisLabelPositionTop;
+    xAxis.labelPosition = XAxisLabelPositionBottom;
+    xAxis.labelFont = [UIFont systemFontOfSize:12];
+    xAxis.labelTextColor = UIColor.lightGrayColor;
+    xAxis.drawGridLinesEnabled = NO;
+    xAxis.axisLineColor = [UIColor.lightGrayColor colorWithAlphaComponent:0.4];
+    xAxis.labelCount = 7;
+    xAxis.granularity = 1;
+    xAxis.spaceMin = xAxis.spaceMax =0.75;
+    
+    ChartYAxis *rightAxis = _chartView.rightAxis;
+    rightAxis.labelFont = xAxis.labelFont;
+    rightAxis.labelCount = 5;
+    rightAxis.labelTextColor = xAxis.labelTextColor;
+    rightAxis.axisLineDashLengths = @[@(2), @(2)];
+    rightAxis.axisLineDashPhase = 2;
+    rightAxis.gridLineDashLengths = rightAxis.axisLineDashLengths;
+    rightAxis.axisMinimum = 0;
+    rightAxis.gridColor = xAxis.axisLineColor;
+    rightAxis.axisLineColor = xAxis.axisLineColor;
+    NSNumberFormatter *rightAxisFormatter = NSNumberFormatter.new;
+    rightAxisFormatter.multiplier = @(0.001);
+    rightAxisFormatter.minimumFractionDigits = 0;
+    rightAxisFormatter.maximumFractionDigits = 1;
+    rightAxisFormatter.minimumIntegerDigits = 1;
+    rightAxisFormatter.negativePrefix = nil;
+    rightAxisFormatter.negativeSuffix = @"km";
+    rightAxisFormatter.positiveSuffix = rightAxisFormatter.negativeSuffix;
+    rightAxis.valueFormatter = [[ChartDefaultAxisValueFormatter alloc] initWithFormatter:rightAxisFormatter];
     
     ChartLegend *l = _chartView.legend;
     l.horizontalAlignment = ChartLegendHorizontalAlignmentRight;
@@ -79,7 +97,7 @@
     l.formToTextSpace = 4.0;
     l.xEntrySpace = 6.0;
     
-    _sliderX.value = 6;
+    _sliderX.value = 14;
     _sliderY.value = 100.0;
     [self slidersValueChanged:nil];
     
@@ -112,7 +130,7 @@
         double val1 = (double) (arc4random_uniform(mult) + mult / 3);
         double val2 = (double) (arc4random_uniform(mult) + mult / 3);
         
-        [yVals addObject:[[BarChartDataEntry alloc] initWithX:i yValues:@[@(val1), @(val2)] icon: [UIImage imageNamed:@"icon"]]];
+        [yVals addObject:[[BarChartDataEntry alloc] initWithX:i yValues:@[@(val1), @(val2)]]];
     }
     
     BarChartDataSet *set1 = nil;
@@ -125,36 +143,31 @@
     }
     else
     {
-        set1 = [[BarChartDataSet alloc] initWithValues:yVals label:@"Statistics Vienna 2014"];
+        set1 = [[BarChartDataSet alloc] initWithValues:yVals];
         
-        set1.drawIconsEnabled = NO;
-        
-        set1.stackLabels = @[@"Births", @"Divorces"];
-        
-//        set1.roundedCorners = UIRectCornerTopLeft|UIRectCornerTopRight;
-//        set1.cornerRadius = 5.0;
-        
-//        CGFloat alpha = 0.5;
-//        set1.barGradientColors = @[
-//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]]
-//  ];
-//        set1.barGradientOrientation = BarGradientOrientationHorizontal;
-        
+        set1.axisDependency = AxisDependencyRight;
+        set1.cornerRadius = 3;
+        set1.roundedCorners = UIRectCornerTopLeft|UIRectCornerTopRight;
+        set1.drawValuesEnabled = NO;
         set1.highlightAlpha = 0;
-//        set1.highlightColor = UIColor.clearColor;
+        
+        CGFloat alpha = 0.5;
+        set1.barGradientColors = @[
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]]
+  ];
         
         NSMutableArray *dataSets = [[NSMutableArray alloc] init];
         [dataSets addObject:set1];
@@ -165,15 +178,14 @@
         formatter.positiveSuffix = @" $";
         
         BarChartData *data = [[BarChartData alloc] initWithDataSets:dataSets];
-        [data setValueFont:[UIFont fontWithName:@"HelveticaNeue-Light" size:7.f]];
-        [data setValueFormatter:[[ChartDefaultValueFormatter alloc] initWithFormatter:formatter]];
-        [data setValueTextColor:UIColor.whiteColor];
+        data.barWidth = 0.5;
         
-        _chartView.fitBars = YES;
+//        _chartView.fitBars = YES;
         _chartView.data = data;
     }
     
     _chartView.visibleXRangeMaximum = 7;
+    [_chartView moveViewToX:_chartView.chartXMax-7.25];
     
 //    [_chartView highlightValueWithX:2 dataSetIndex:0 stackIndex:-1];
 }

@@ -281,7 +281,7 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                                                             firstIndexInBar: firstIndexInBar,
                                                             lastIndexInBar: lastIndexInBar)
                 }
-                if dataSet.roundedCorners.contains(.bottomLeft) || dataSet.roundedCorners.contains(.bottomRight)
+                if dataSet.roundedCorners.contains(.topRight) || dataSet.roundedCorners.contains(.bottomRight)
                 {
                     rightIndexInBar = findMostRightIndexInBar(barRects: buffer.rects,
                                                               firstIndexInBar: firstIndexInBar,
@@ -293,6 +293,10 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                     context.saveGState()
                     
                     let barRect = buffer.rects[stackIndex]
+                    
+                    guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
+                    guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
+                    
                     var path : UIBezierPath
                     if leftIndexInBar>=0 && stackIndex==leftIndexInBar
                     {
@@ -309,10 +313,6 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                     
                     context.addPath(path.cgPath)
                     context.clip()
-                    
-                    guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
-                    guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
-                    
                     
                     drawBar(context: context, dataSet: dataSet, index: stackIndex, barRect: barRect)
                     
@@ -348,13 +348,13 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                 
                 let barRect = buffer.rects[barIndex]
                 
+                guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
+                guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
+                
                 let path = createBarPath(for: barRect, roundedCorners: dataSet.roundedCorners, cornerRadius: dataSet.cornerRadius)
                 
                 context.addPath(path.cgPath)
                 context.clip()
-                
-                guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
-                guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
                 
                 drawBar(context: context, dataSet: dataSet, index: barIndex, barRect: barRect)
                 

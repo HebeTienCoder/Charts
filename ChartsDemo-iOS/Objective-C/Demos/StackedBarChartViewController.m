@@ -51,11 +51,6 @@
     _chartView.scaleYEnabled = NO;
     _chartView.doubleTapToZoomEnabled = NO;
     _chartView.highlightFullBarEnabled = YES;
-    
-    NSNumberFormatter *leftAxisFormatter = [[NSNumberFormatter alloc] init];
-    leftAxisFormatter.maximumFractionDigits = 1;
-    leftAxisFormatter.negativeSuffix = @" $";
-    leftAxisFormatter.positiveSuffix = @" $";
 
     ChartXAxis *xAxis = _chartView.xAxis;
     xAxis.labelPosition = XAxisLabelPositionBottom;
@@ -65,7 +60,7 @@
     xAxis.axisLineColor = [UIColor.lightGrayColor colorWithAlphaComponent:0.4];
     xAxis.labelCount = 7;
     xAxis.granularity = 1;
-    xAxis.spaceMin = xAxis.spaceMax =0.75;
+    xAxis.spaceMin = xAxis.spaceMax = 0.75;
     
     ChartYAxis *rightAxis = _chartView.rightAxis;
     rightAxis.labelFont = xAxis.labelFont;
@@ -97,7 +92,7 @@
     l.formToTextSpace = 4.0;
     l.xEntrySpace = 6.0;
     
-    _sliderX.value = 14;
+    _sliderX.value = 6;
     _sliderY.value = 100.0;
     [self slidersValueChanged:nil];
     
@@ -185,7 +180,7 @@
     }
     
     _chartView.visibleXRangeMaximum = 7;
-    [_chartView moveViewToX:_chartView.chartXMax-7.25];
+//    [_chartView moveViewToX:_chartView.chartXMax-7.25];
     
 //    [_chartView highlightValueWithX:2 dataSetIndex:0 stackIndex:-1];
 }

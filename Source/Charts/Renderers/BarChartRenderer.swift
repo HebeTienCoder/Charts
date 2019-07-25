@@ -251,7 +251,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         let drawBorder = borderWidth > 0.0
         
         context.saveGState()
-        defer { context.restoreGState() }
         
         // draw the bar shadow before the values
         if dataProvider.isDrawBarShadowEnabled
@@ -300,9 +299,14 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             }
         }
         
-        context.setStrokeColor(borderColor.cgColor)
-        context.setLineWidth(borderWidth)
-        context.setLineCap(.square)
+        if drawBorder
+        {
+            context.setStrokeColor(borderColor.cgColor)
+            context.setLineWidth(borderWidth)
+            context.setLineCap(.square)
+        }
+        
+        context.restoreGState()
         
         // In case the chart is stacked, we need to accomodate individual bars within accessibilityOrdereredElements
         let isStacked = dataSet.isStacked
@@ -356,8 +360,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 
                 for stackIndex in firstIndexInBar...lastIndexInBar
                 {
-                    context.saveGState()
-                    
                     let barRect = buffer[stackIndex]
                     
                     guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
@@ -377,10 +379,20 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                         path = createBarPath(for: barRect, roundedCorners: .allCorners, cornerRadius: 0)
                     }
                     
+                    context.saveGState()
+                    
                     context.addPath(path.cgPath)
                     context.clip()
                     
                     drawBar(context: context, dataSet: dataSet, index: stackIndex, barRect: barRect)
+                    
+                    if drawBorder
+                    {
+                        context.addPath(path.cgPath)
+                        context.strokePath()
+                    }
+                    
+                    context.restoreGState()
                     
                     // Create and append the corresponding accessibility element to accessibilityOrderedElements
                     if let chart = dataProvider as? BarChartView
@@ -396,22 +408,12 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                         
                         accessibilityOrderedElements[stackIndex/stackSize].append(element)
                     }
-                    
-                    context.restoreGState()
-                    
-                    if drawBorder
-                    {
-                        context.addPath(path.cgPath)
-                        context.strokePath()
-                    }
                 }
             }
             
         }else {
             for barIndex in buffer.indices
             {
-                context.saveGState()
-                
                 let barRect = buffer[barIndex]
                 
                 guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
@@ -419,14 +421,20 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 
                 let path = createBarPath(for: barRect, roundedCorners: dataSet.roundedCorners, cornerRadius: dataSet.cornerRadius)
                 
+                context.saveGState()
+                
                 context.addPath(path.cgPath)
                 context.clip()
                 
                 drawBar(context: context, dataSet: dataSet, index: barIndex, barRect: barRect)
                 
-                if drawBorder {
-                    context.saveGState()
+                if drawBorder
+                {
+                    context.addPath(path.cgPath)
+                    context.strokePath()
                 }
+                
+                context.restoreGState()
                 
                 // Create and append the corresponding accessibility element to accessibilityOrderedElements
                 if let chart = dataProvider as? BarChartView
@@ -441,14 +449,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                     }
                     
                     accessibilityOrderedElements[barIndex/stackSize].append(element)
-                }
-                
-                context.restoreGState()
-                
-                if drawBorder
-                {
-                    context.addPath(path.cgPath)
-                    context.strokePath()
                 }
             }
         }

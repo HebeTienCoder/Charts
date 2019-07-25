@@ -131,26 +131,26 @@
         
         set1.stackLabels = @[@"Births", @"Divorces"];
         
-        set1.roundedCorners = UIRectCornerTopLeft|UIRectCornerTopRight;
-        set1.cornerRadius = 5.0;
+//        set1.roundedCorners = UIRectCornerTopLeft|UIRectCornerTopRight;
+//        set1.cornerRadius = 5.0;
         
-        CGFloat alpha = 0.5;
-        set1.barGradientColors = @[
-  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]]
-  ];
+//        CGFloat alpha = 0.5;
+//        set1.barGradientColors = @[
+//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//  @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]]
+//  ];
 //        set1.barGradientOrientation = BarGradientOrientationHorizontal;
         
         set1.highlightAlpha = 0;
@@ -173,7 +173,9 @@
         _chartView.data = data;
     }
     
-    [_chartView highlightValueWithX:2 dataSetIndex:0 stackIndex:-1];
+    _chartView.visibleXRangeMaximum = 7;
+    
+//    [_chartView highlightValueWithX:2 dataSetIndex:0 stackIndex:-1];
 }
 
 - (void)optionTapped:(NSString *)key
@@ -195,27 +197,27 @@
 
 - (void)chartValueSelected:(ChartViewBase * __nonnull)chartView entry:(ChartDataEntry * __nonnull)entry highlight:(ChartHighlight * __nonnull)highlight
 {
-    NSLog(@"chartValueSelected, stack-index %ld", (long)highlight.x);
-    
-    CGFloat alpha = 0.5;
-    NSMutableArray *arr = @[
-                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
-                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]]
-                            ].mutableCopy;
-    [arr insertObjects:@[@[[UIColor.yellowColor colorWithAlphaComponent:1], [UIColor.orangeColor colorWithAlphaComponent:1]],
-                        @[[UIColor.redColor colorWithAlphaComponent:1], [UIColor.purpleColor colorWithAlphaComponent:1]]] atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange((long)highlight.x*2, 2)]];
-    ((BarChartDataSet *)chartView.data.dataSets[0]).barGradientColors = arr;
-    [chartView notifyDataSetChanged];
+//    NSLog(@"chartValueSelected, stack-index %ld", (long)highlight.x);
+//    
+//    CGFloat alpha = 0.5;
+//    NSMutableArray *arr = @[
+//                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
+//                            @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]]
+//                            ].mutableCopy;
+//    [arr insertObjects:@[@[[UIColor.yellowColor colorWithAlphaComponent:1], [UIColor.orangeColor colorWithAlphaComponent:1]],
+//                        @[[UIColor.redColor colorWithAlphaComponent:1], [UIColor.purpleColor colorWithAlphaComponent:1]]] atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange((long)highlight.x*2, 2)]];
+//    ((BarChartDataSet *)chartView.data.dataSets[0]).barGradientColors = arr;
+//    [chartView notifyDataSetChanged];
 }
 
 - (void)chartValueNothingSelected:(ChartViewBase * __nonnull)chartView

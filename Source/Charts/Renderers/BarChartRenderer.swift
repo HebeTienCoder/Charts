@@ -359,6 +359,10 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                     context.saveGState()
                     
                     let barRect = buffer[stackIndex]
+                    
+                    guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
+                    guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
+                    
                     var path : UIBezierPath
                     if topIndexInBar>=0 && stackIndex==topIndexInBar
                     {
@@ -375,9 +379,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                     
                     context.addPath(path.cgPath)
                     context.clip()
-                    
-                    guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
-                    guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
                     
                     drawBar(context: context, dataSet: dataSet, index: stackIndex, barRect: barRect)
                     
@@ -413,13 +414,13 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 
                 let barRect = buffer[barIndex]
                 
+                guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
+                guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
+                
                 let path = createBarPath(for: barRect, roundedCorners: dataSet.roundedCorners, cornerRadius: dataSet.cornerRadius)
                 
                 context.addPath(path.cgPath)
                 context.clip()
-                
-                guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
-                guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
                 
                 drawBar(context: context, dataSet: dataSet, index: barIndex, barRect: barRect)
                 

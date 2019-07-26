@@ -12,6 +12,12 @@
 import Foundation
 import CoreGraphics
 
+@objc
+public enum GradientOrientation: Int
+{
+    case vertical
+    case horizontal
+}
 
 open class ChartBaseDataSet: NSObject, ChartDataSetProtocol
 {
@@ -263,6 +269,19 @@ open class ChartBaseDataSet: NSObject, ChartDataSetProtocol
         self.colors = colors
     }
     
+    /// array of gradient colors [[color1, color2], [color3, color4]]
+    open var gradientColors: [[NSUIColor]]?
+    
+    open var gradientOrientation: GradientOrientation = .vertical
+    
+    /// - returns: The gradient colors at the given index of the DataSet's gradient color array.
+    /// This prevents out-of-bounds by performing a modulus on the gradient color index, so colours will repeat themselves.
+    open func gradientColor(at index: Int) -> [NSUIColor]?
+    {
+        guard let gColors = gradientColors else { return nil }
+        return gColors[index % gColors.count]
+    }
+    
     /// if true, value highlighting is enabled
     open var highlightEnabled = true
     
@@ -396,6 +415,8 @@ open class ChartBaseDataSet: NSObject, ChartDataSetProtocol
         copy.colors = colors
         copy.valueColors = valueColors
         copy.label = label
+        copy.gradientColors = gradientColors
+        copy.gradientOrientation = gradientOrientation
         
         return copy
     }

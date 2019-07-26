@@ -20,6 +20,8 @@
 @property (nonatomic, strong) IBOutlet UITextField *sliderTextX;
 @property (nonatomic, strong) IBOutlet UITextField *sliderTextY;
 
+@property (nonatomic, strong) BarChartView *barChartView;
+
 @end
 
 @implementation StackedBarChartViewController
@@ -28,41 +30,28 @@
 {
     [super viewDidLoad];
     
-    self.title = @"Stacked Bar Chart";
+    _chartView.hidden = YES;
     
-    self.options = @[
-                     @{@"key": @"toggleValues", @"label": @"Toggle Values"},
-                     @{@"key": @"toggleIcons", @"label": @"Toggle Icons"},
-                     @{@"key": @"toggleHighlight", @"label": @"Toggle Highlight"},
-                     @{@"key": @"animateX", @"label": @"Animate X"},
-                     @{@"key": @"animateY", @"label": @"Animate Y"},
-                     @{@"key": @"animateXY", @"label": @"Animate XY"},
-                     @{@"key": @"saveToGallery", @"label": @"Save to Camera Roll"},
-                     @{@"key": @"togglePinchZoom", @"label": @"Toggle PinchZoom"},
-                     @{@"key": @"toggleAutoScaleMinMax", @"label": @"Toggle auto scale min/max"},
-                     @{@"key": @"toggleData", @"label": @"Toggle Data"},
-                     @{@"key": @"toggleBarBorders", @"label": @"Show Bar Borders"},
-                    ];
+    _barChartView = BarChartView.new;
+    _barChartView.frame = CGRectMake(12.5, 100, self.view.bounds.size.width-25, 300);
+    _barChartView.leftAxis.enabled = NO;
+    _barChartView.noDataText = @"暂无骑行数据";
+    _barChartView.noDataFont = [UIFont systemFontOfSize:17];
+    _barChartView.noDataTextColor = UIColor.grayColor;
+    _barChartView.scaleYEnabled = NO;
+    _barChartView.doubleTapToZoomEnabled = NO;
     
-    _chartView.delegate = self;
-    _chartView.legend.enabled = NO;
-    _chartView.leftAxis.enabled = NO;
-    _chartView.noDataText = @"暂无骑行数据";
-    _chartView.scaleYEnabled = NO;
-    _chartView.doubleTapToZoomEnabled = NO;
-    _chartView.highlightFullBarEnabled = YES;
-
-    ChartXAxis *xAxis = _chartView.xAxis;
+    ChartXAxis *xAxis = _barChartView.xAxis;
     xAxis.labelPosition = XAxisLabelPositionBottom;
     xAxis.labelFont = [UIFont systemFontOfSize:12];
     xAxis.labelTextColor = UIColor.lightGrayColor;
     xAxis.drawGridLinesEnabled = NO;
-    xAxis.axisLineColor = [UIColor.lightGrayColor colorWithAlphaComponent:0.4];
+    xAxis.axisLineColor = UIColor.lightGrayColor;
     xAxis.labelCount = 7;
     xAxis.granularity = 1;
-    xAxis.spaceMin = xAxis.spaceMax = 0.75;
+    xAxis.spaceMin = xAxis.spaceMax =0.75;
     
-    ChartYAxis *rightAxis = _chartView.rightAxis;
+    ChartYAxis *rightAxis = _barChartView.rightAxis;
     rightAxis.labelFont = xAxis.labelFont;
     rightAxis.labelCount = 5;
     rightAxis.labelTextColor = xAxis.labelTextColor;
@@ -80,19 +69,75 @@
     rightAxisFormatter.negativePrefix = nil;
     rightAxisFormatter.negativeSuffix = @"km";
     rightAxisFormatter.positiveSuffix = rightAxisFormatter.negativeSuffix;
-    rightAxis.valueFormatter = [[ChartDefaultAxisValueFormatter alloc] initWithFormatter:rightAxisFormatter];
+    rightAxis.valueFormatter = [ChartDefaultAxisValueFormatter.alloc initWithFormatter:rightAxisFormatter];
     
-    ChartLegend *l = _chartView.legend;
-    l.horizontalAlignment = ChartLegendHorizontalAlignmentRight;
-    l.verticalAlignment = ChartLegendVerticalAlignmentBottom;
-    l.orientation = ChartLegendOrientationHorizontal;
-    l.drawInside = NO;
-    l.form = ChartLegendFormSquare;
-    l.formSize = 8.0;
-    l.formToTextSpace = 4.0;
-    l.xEntrySpace = 6.0;
+    [self.view addSubview:_barChartView];
     
-    _sliderX.value = 6;
+    self.title = @"Stacked Bar Chart";
+
+    self.options = @[
+                     @{@"key": @"toggleValues", @"label": @"Toggle Values"},
+                     @{@"key": @"toggleIcons", @"label": @"Toggle Icons"},
+                     @{@"key": @"toggleHighlight", @"label": @"Toggle Highlight"},
+                     @{@"key": @"animateX", @"label": @"Animate X"},
+                     @{@"key": @"animateY", @"label": @"Animate Y"},
+                     @{@"key": @"animateXY", @"label": @"Animate XY"},
+                     @{@"key": @"saveToGallery", @"label": @"Save to Camera Roll"},
+                     @{@"key": @"togglePinchZoom", @"label": @"Toggle PinchZoom"},
+                     @{@"key": @"toggleAutoScaleMinMax", @"label": @"Toggle auto scale min/max"},
+                     @{@"key": @"toggleData", @"label": @"Toggle Data"},
+                     @{@"key": @"toggleBarBorders", @"label": @"Show Bar Borders"},
+                    ];
+//
+//    _chartView.delegate = self;
+//    _chartView.legend.enabled = NO;
+//    _chartView.leftAxis.enabled = NO;
+//    _chartView.noDataText = @"暂无骑行数据";
+//    _chartView.scaleYEnabled = NO;
+//    _chartView.doubleTapToZoomEnabled = NO;
+//    _chartView.highlightFullBarEnabled = YES;
+//
+//    ChartXAxis *xAxis = _chartView.xAxis;
+//    xAxis.labelPosition = XAxisLabelPositionBottom;
+//    xAxis.labelFont = [UIFont systemFontOfSize:12];
+//    xAxis.labelTextColor = UIColor.lightGrayColor;
+//    xAxis.drawGridLinesEnabled = NO;
+//    xAxis.axisLineColor = [UIColor.lightGrayColor colorWithAlphaComponent:0.4];
+//    xAxis.labelCount = 7;
+//    xAxis.granularity = 1;
+//    xAxis.spaceMin = xAxis.spaceMax = 0.75;
+//
+//    ChartYAxis *rightAxis = _chartView.rightAxis;
+//    rightAxis.labelFont = xAxis.labelFont;
+//    rightAxis.labelCount = 5;
+//    rightAxis.labelTextColor = xAxis.labelTextColor;
+//    rightAxis.axisLineDashLengths = @[@(2), @(2)];
+//    rightAxis.axisLineDashPhase = 2;
+//    rightAxis.gridLineDashLengths = rightAxis.axisLineDashLengths;
+//    rightAxis.axisMinimum = 0;
+//    rightAxis.gridColor = xAxis.axisLineColor;
+//    rightAxis.axisLineColor = xAxis.axisLineColor;
+//    NSNumberFormatter *rightAxisFormatter = NSNumberFormatter.new;
+//    rightAxisFormatter.multiplier = @(0.001);
+//    rightAxisFormatter.minimumFractionDigits = 0;
+//    rightAxisFormatter.maximumFractionDigits = 1;
+//    rightAxisFormatter.minimumIntegerDigits = 1;
+//    rightAxisFormatter.negativePrefix = nil;
+//    rightAxisFormatter.negativeSuffix = @"km";
+//    rightAxisFormatter.positiveSuffix = rightAxisFormatter.negativeSuffix;
+//    rightAxis.valueFormatter = [[ChartDefaultAxisValueFormatter alloc] initWithFormatter:rightAxisFormatter];
+//
+////    ChartLegend *l = _chartView.legend;
+////    l.horizontalAlignment = ChartLegendHorizontalAlignmentRight;
+////    l.verticalAlignment = ChartLegendVerticalAlignmentBottom;
+////    l.orientation = ChartLegendOrientationHorizontal;
+////    l.drawInside = NO;
+////    l.form = ChartLegendFormSquare;
+////    l.formSize = 8.0;
+////    l.formToTextSpace = 4.0;
+////    l.xEntrySpace = 6.0;
+
+    _sliderX.value = 14;
     _sliderY.value = 100.0;
     [self slidersValueChanged:nil];
     
@@ -108,7 +153,7 @@
 {
     if (self.shouldHideData)
     {
-        _chartView.data = nil;
+        _barChartView.data = nil;
         return;
     }
     
@@ -129,12 +174,12 @@
     }
     
     BarChartDataSet *set1 = nil;
-    if (_chartView.data.dataSetCount > 0)
+    if (_barChartView.data.dataSetCount > 0)
     {
-        set1 = (BarChartDataSet *)_chartView.data.dataSets[0];
+        set1 = (BarChartDataSet *)_barChartView.data.dataSets[0];
         set1.values = yVals;
-        [_chartView.data notifyDataChanged];
-        [_chartView notifyDataSetChanged];
+        [_barChartView.data notifyDataChanged];
+        [_barChartView notifyDataSetChanged];
     }
     else
     {
@@ -147,7 +192,7 @@
         set1.highlightAlpha = 0;
         
         CGFloat alpha = 0.5;
-        set1.barGradientColors = @[
+        set1.gradientColors = @[
   @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
   @[[UIColor.redColor colorWithAlphaComponent:alpha], [UIColor.purpleColor colorWithAlphaComponent:alpha]],
   @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
@@ -167,27 +212,23 @@
         NSMutableArray *dataSets = [[NSMutableArray alloc] init];
         [dataSets addObject:set1];
         
-        NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-        formatter.maximumFractionDigits = 1;
-        formatter.negativeSuffix = @" $";
-        formatter.positiveSuffix = @" $";
-        
         BarChartData *data = [[BarChartData alloc] initWithDataSets:dataSets];
         data.barWidth = 0.5;
         
-//        _chartView.fitBars = YES;
-        _chartView.data = data;
+//        _barChartView = YES;
+        _barChartView.data = data;
+        
+        [_barChartView highlightValueWithX:2 dataSetIndex:0 stackIndex:-1];
     }
     
-    _chartView.visibleXRangeMaximum = 7;
-//    [_chartView moveViewToX:_chartView.chartXMax-7.25];
-    
-//    [_chartView highlightValueWithX:2 dataSetIndex:0 stackIndex:-1];
+    _barChartView.visibleXRangeMaximum = 7;
+    [_barChartView moveViewToX:_barChartView.chartXMax];
+    [_barChartView animateWithYAxisDuration:1.2 easingOption:ChartEasingOptionEaseInOutCubic];
 }
 
 - (void)optionTapped:(NSString *)key
 {
-    [super handleOption:key forChartView:_chartView];
+    [super handleOption:key forChartView:_barChartView];
 }
 
 #pragma mark - Actions

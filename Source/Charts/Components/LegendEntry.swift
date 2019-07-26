@@ -73,4 +73,7 @@ open class LegendEntry: NSObject
     
     /// The color for drawing the form
     @objc open var formColor: NSUIColor?
+    /// The gradient colors for drawing the form
+    @objc open var formGradientColors: [NSUIColor]?
+    @objc open var formGradientOrientation: GradientOrientation = .vertical
 }

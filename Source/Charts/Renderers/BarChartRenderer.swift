@@ -459,9 +459,9 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         context.saveGState()
         defer { context.restoreGState() }
         
-        if let gradientColor = dataSet.barGradientColor(at: index)
+        if let gradientColor = dataSet.gradientColor(at: index)
         {
-            drawGradient(context: context, barRect: barRect, gradientColors: gradientColor, orientation: dataSet.barGradientOrientation)
+            drawGradient(context: context, rect: barRect, gradientColors: gradientColor, orientation: dataSet.gradientOrientation)
         }
         else
         {
@@ -472,7 +472,7 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         }
     }
     
-    open func drawGradient(context: CGContext, barRect: CGRect, gradientColors: Array<NSUIColor>, orientation: BarGradientOrientation)
+    open func drawGradient(context: CGContext, rect: CGRect, gradientColors: Array<NSUIColor>, orientation: GradientOrientation)
     {
         let cgColors = gradientColors.map{ $0.cgColor } as CFArray
         let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: cgColors, locations: nil)
@@ -483,15 +483,15 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         switch orientation
         {
         case .vertical:
-            startPoint = CGPoint(x: barRect.midX, y: barRect.maxY)
-            endPoint = CGPoint(x: barRect.midX, y: barRect.minY)
+            startPoint = CGPoint(x: rect.midX, y: rect.maxY)
+            endPoint = CGPoint(x: rect.midX, y: rect.minY)
             
         case .horizontal:
-            startPoint = CGPoint(x: barRect.minX, y: barRect.midY)
-            endPoint = CGPoint(x: barRect.maxX, y: barRect.midY)
+            startPoint = CGPoint(x: rect.minX, y: rect.midY)
+            endPoint = CGPoint(x: rect.maxX, y: rect.midY)
         }
         
-        let path = CGPath(rect: barRect, transform: nil)
+        let path = CGPath(rect: rect, transform: nil)
         
         context.addPath(path)
         context.clip()

@@ -43,8 +43,9 @@ open class LegendRenderer: NSObject, Renderer
             
             // loop for building up the colors and labels used in the legend
             for dataSet in data
-            {                
-                var clrs: [NSUIColor] = dataSet.colors
+            {
+                let colorCount = max(dataSet.colors.count, dataSet.gradientColors?.count ?? 0)
+                
                 let entryCount = dataSet.entryCount
                 
                 // if we have a barchart with stacked bars
@@ -53,7 +54,7 @@ open class LegendRenderer: NSObject, Renderer
                 {
                     let bds = dataSet as! BarChartDataSetProtocol
                     var sLabels = bds.stackLabels
-                    let minEntries = min(clrs.count, bds.stackSize)
+                    let minEntries = min(colorCount, bds.stackSize)
 
                     for j in 0..<minEntries
                     {
@@ -71,8 +72,10 @@ open class LegendRenderer: NSObject, Renderer
                         entry.formLineWidth = dataSet.formLineWidth
                         entry.formLineDashPhase = dataSet.formLineDashPhase
                         entry.formLineDashLengths = dataSet.formLineDashLengths
-                        entry.formColor = clrs[j]
-
+                        entry.formColor = dataSet.color(atIndex: j)
+                        entry.formGradientColors = dataSet.gradientColor(at: j)
+                        entry.formGradientOrientation = dataSet.gradientOrientation
+                        
                         entries.append(entry)
                     }
                     
@@ -89,7 +92,7 @@ open class LegendRenderer: NSObject, Renderer
                 {
                     let pds = dataSet as! PieChartDataSetProtocol
                     
-                    for j in 0..<min(clrs.count, entryCount)
+                    for j in 0..<min(colorCount, entryCount)
                     {
                         let entry = LegendEntry(label: (pds.entryForIndex(j) as? PieChartDataEntry)?.label)
                         entry.form = dataSet.form
@@ -97,7 +100,9 @@ open class LegendRenderer: NSObject, Renderer
                         entry.formLineWidth = dataSet.formLineWidth
                         entry.formLineDashPhase = dataSet.formLineDashPhase
                         entry.formLineDashLengths = dataSet.formLineDashLengths
-                        entry.formColor = clrs[j]
+                        entry.formColor = dataSet.color(atIndex: j)
+                        entry.formGradientColors = dataSet.gradientColor(at: j)
+                        entry.formGradientOrientation = dataSet.gradientOrientation
 
                         entries.append(entry)
                     }
@@ -139,12 +144,12 @@ open class LegendRenderer: NSObject, Renderer
                 else
                 { // all others
                     
-                    for j in 0..<min(clrs.count, entryCount)
+                    for j in 0..<min(colorCount, entryCount)
                     {
                         let label: String?
                         
                         // if multiple colors are set for a DataSet, group them
-                        if j < clrs.count - 1 && j < entryCount - 1
+                        if j < colorCount - 1 && j < entryCount - 1
                         {
                             label = nil
                         }
@@ -159,7 +164,9 @@ open class LegendRenderer: NSObject, Renderer
                         entry.formLineWidth = dataSet.formLineWidth
                         entry.formLineDashPhase = dataSet.formLineDashPhase
                         entry.formLineDashLengths = dataSet.formLineDashLengths
-                        entry.formColor = clrs[j]
+                        entry.formColor = dataSet.color(atIndex: j)
+                        entry.formGradientColors = dataSet.gradientColor(at: j)
+                        entry.formGradientOrientation = dataSet.gradientOrientation
 
                         entries.append(entry)
                     }
@@ -482,10 +489,11 @@ open class LegendRenderer: NSObject, Renderer
         entry: LegendEntry,
         legend: Legend)
     {
-        guard
-            let formColor = entry.formColor,
-            formColor != NSUIColor.clear
-            else { return }
+        let formColor = entry.formColor
+        let formGradientColors = entry.formGradientColors
+        if formGradientColors == nil && (formColor == nil || formColor == NSUIColor.clear) {
+            return
+        }
         
         var form = entry.form
         if form == .default
@@ -511,14 +519,39 @@ open class LegendRenderer: NSObject, Renderer
         case .default: fallthrough
         case .circle:
             
-            context.setFillColor(formColor.cgColor)
-            context.fillEllipse(in: CGRect(x: x, y: y - formSize / 2.0, width: formSize, height: formSize))
+            let rect = CGRect(x: x, y: y - formSize / 2.0, width: formSize, height: formSize)
+            
+            if formGradientColors != nil
+            {
+                let path = CGPath(ellipseIn: rect, transform: nil)
+                context.addPath(path)
+                context.clip()
+                drawGradient(context: context, rect: rect, gradientColors: formGradientColors!, orientation: entry.formGradientOrientation)
+            }
+            else
+            {
+                context.setFillColor(formColor!.cgColor)
+                context.fillEllipse(in: rect)
+            }
             
         case .square:
             
-            context.setFillColor(formColor.cgColor)
-            context.fill(CGRect(x: x, y: y - formSize / 2.0, width: formSize, height: formSize))
+            let rect = CGRect(x: x, y: y - formSize / 2.0, width: formSize, height: formSize)
             
+            
+            if formGradientColors != nil
+            {
+                let path = CGPath(rect: rect, transform: nil)
+                context.addPath(path)
+                context.clip()
+                drawGradient(context: context, rect: rect, gradientColors: formGradientColors!, orientation: entry.formGradientOrientation)
+            }
+            else
+            {
+                context.setFillColor(formColor!.cgColor)
+                context.fill(rect)
+            }
+
         case .line:
             
             let formLineWidth = entry.formLineWidth.isNaN ? legend.formLineWidth : entry.formLineWidth
@@ -536,7 +569,7 @@ open class LegendRenderer: NSObject, Renderer
                 context.setLineDash(phase: 0.0, lengths: [])
             }
             
-            context.setStrokeColor(formColor.cgColor)
+            context.setStrokeColor(formColor!.cgColor)
             
             _formLineSegmentsBuffer[0].x = x
             _formLineSegmentsBuffer[0].y = y
@@ -550,5 +583,27 @@ open class LegendRenderer: NSObject, Renderer
     @objc open func drawLabel(context: CGContext, x: CGFloat, y: CGFloat, label: String, font: NSUIFont, textColor: NSUIColor)
     {
         context.drawText(label, at: CGPoint(x: x, y: y), align: .left, attributes: [.font: font, .foregroundColor: textColor])
+    }
+    
+    private func drawGradient(context: CGContext, rect: CGRect, gradientColors: Array<NSUIColor>, orientation: GradientOrientation)
+    {
+        let cgColors = gradientColors.map{ $0.cgColor } as CFArray
+        let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: cgColors, locations: nil)
+        
+        let startPoint: CGPoint
+        let endPoint: CGPoint
+        
+        switch orientation
+        {
+        case .vertical:
+            startPoint = CGPoint(x: rect.midX, y: rect.maxY)
+            endPoint = CGPoint(x: rect.midX, y: rect.minY)
+            
+        case .horizontal:
+            startPoint = CGPoint(x: rect.minX, y: rect.midY)
+            endPoint = CGPoint(x: rect.maxX, y: rect.midY)
+        }
+        
+        context.drawLinearGradient(gradient!, start: startPoint, end: endPoint, options: [])
     }
 }

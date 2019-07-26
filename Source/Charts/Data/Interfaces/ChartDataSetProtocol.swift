@@ -180,6 +180,15 @@ public protocol ChartDataSetProtocol
     
     func setColor(_ color: NSUIColor)
     
+    /// array of gradient colors [[color1, color2], [color3, color4]]
+    var gradientColors: [[NSUIColor]]? { get set }
+    
+    var gradientOrientation: GradientOrientation { get set }
+    
+    /// - returns: The gradient colors at the given index of the DataSet's gradient color array.
+    /// This prevents out-of-bounds by performing a modulus on the gradient color index, so colours will repeat themselves.
+    func gradientColor(at index: Int) -> [NSUIColor]?
+    
     /// if true, value highlighting is enabled
     var highlightEnabled: Bool { get set }
     

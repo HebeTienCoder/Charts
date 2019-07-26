@@ -163,7 +163,7 @@
         set1.roundedCorners = UIRectCornerTopLeft|UIRectCornerTopRight;
         set1.cornerRadius = 3.0;
         //gradient
-        set1.barGradientColors = ChartColorTemplates.gradients;
+        set1.gradientColors = ChartColorTemplates.gradients;
 //        set1.barGradientOrientation = BarGradientOrientationHorizontal;
         
         NSMutableArray *dataSets = [[NSMutableArray alloc] init];

@@ -177,13 +177,13 @@
     if (_barChartView.data.dataSetCount > 0)
     {
         set1 = (BarChartDataSet *)_barChartView.data.dataSets[0];
-        set1.values = yVals;
+        [set1 replaceEntries:yVals];
         [_barChartView.data notifyDataChanged];
         [_barChartView notifyDataSetChanged];
     }
     else
     {
-        set1 = [[BarChartDataSet alloc] initWithValues:yVals];
+        set1 = [[BarChartDataSet alloc] initWithEntries:yVals];
         
         set1.axisDependency = AxisDependencyRight;
         set1.cornerRadius = 3;
@@ -246,7 +246,7 @@
 - (void)chartValueSelected:(ChartViewBase * __nonnull)chartView entry:(ChartDataEntry * __nonnull)entry highlight:(ChartHighlight * __nonnull)highlight
 {
 //    NSLog(@"chartValueSelected, stack-index %ld", (long)highlight.x);
-//    
+//
 //    CGFloat alpha = 0.5;
 //    NSMutableArray *arr = @[
 //                            @[[UIColor.yellowColor colorWithAlphaComponent:alpha], [UIColor.orangeColor colorWithAlphaComponent:alpha]],
